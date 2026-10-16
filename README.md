@@ -49,21 +49,13 @@
 - 本工具為非官方工具，與 Urban Games、Paradox Interactive 皆無任何關係。使用可能產生崩潰或資料損壞等風險，請自負風險；不保證相容性、穩定性或帳號安全。
 - 這是把自己的 DLL 讓遊戲載入、並在記憶體裡修改遊戲函式的工具。**防毒軟體可能誤報**；遊戲或顯卡驅動更新後可能需要重新產生特徵碼或暫時停用。
 
-### 安裝程式細節
+### 安裝
 
-`安裝-Install.bat`（實際工作在 `tools\install.ps1`）：雙擊 → 1 安裝或更新 / 2 移除 / 3 產生報錯檔。
+`安裝-Install.bat`：雙擊`安裝-Install.bat`之後 →輸入 1 安裝或更新 / 2 移除 / 3 產生報錯檔。
 
-- 遊戲資料夾自動找：安裝包上層（解壓在遊戲資料夾裡時）、Steam 註冊表 + `libraryfolders.vdf` 裡的每個遊戲庫；找不到就請使用者把資料夾拖進視窗。選錯選項或資料夾會重問（3 次）。
-- 檢查：真的有 `TransportFever3.exe`、遊戲沒在執行、兩個 DLL 都是 x64 而且確認是本外掛的（看 DLL 版本資訊的 ProductName：`Better Snap Option`，或舊名 `TF3 Snap Options`；0.2.1 以前看只有它們才有的字串）。
-- **遊戲資料夾已有別人的 `vulkan-1.dll`**（其他模組）：先說明是什麼檔、問要不要繼續，備份到 `tf3snap\backup\vulkan-1.<時間>.dll`（驗證雜湊），記進 `tf3snap\install.json`；移除時自動還原。
-- 先把新檔複製成 `*.tf3new` 並驗證 SHA256，再一起換上；中途失敗就把換過的還原。
-- 更新不碰 `tf3snap.ini`、`tf3snap_text_*.ini`、log。移除時問要不要連設定一起刪（預設保留）。
-- 介面語言：已安裝過就跟面板設定（`lang=`），否則跟 Windows 顯示語言；四種語言都有。
-- **報錯檔**：任何失敗都會自動在 .bat 旁邊寫 `報錯.log`（寫不了就寫到 `%TEMP%`），選 3 也會產生。內容：安裝過程、錯誤與堆疊、系統 / PowerShell 版本、安裝包與遊戲資料夾裡兩個 DLL 的版本與雜湊、遊戲 exe 雜湊、遊戲資料夾其他 DLL、`tf3snap.ini` / `proxy_error.txt` / 最近 5 次遊玩的 log、遊戲自己的 `crash_dump`、Windows 14 天內這個遊戲的崩潰事件。
-- 參數（不問問題）：`-Action Install|Uninstall|Report -GameDir <資料夾> -SourceRoot <來源> -Yes -RemoveData`。帶引號的路徑**結尾不要加 `\`**：`"D:\Games\TF3\"` 的 `\"` 會被 Windows 命令列當成跳脫的引號。
+- 遊戲資料夾自動找：安裝包上層、Steam 註冊表 + `libraryfolders.vdf` 裡的每個遊戲庫；找不到就請把遊戲資料夾拖進視窗。選錯選項或資料夾會重問。
 
-手動安裝也可以：`vulkan-1.dll` 放遊戲資料夾（與 `TransportFever3.exe` 同一層），`tf3snap.dll` 放其中的 `tf3snap\`。
-暫時停用：在 `tf3snap\` 內建立空檔 `disabled`。設定存在 `tf3snap\tf3snap.ini`。
+手動安裝也可以：`vulkan-1.dll` 放遊戲資料夾（與 `TransportFever3.exe` 同一層），然後把 `tf3snap\`資料夾放進去遊戲主資料夾裡。
 
 ### 授權
 
@@ -118,21 +110,13 @@
 - 本工具为非官方工具，与 Urban Games、Paradox Interactive 均无任何关系。使用可能导致崩溃或数据损坏等风险，风险自负；不保证兼容性、稳定性或账号安全。
 - 本工具会让游戏加载自己的 DLL，并在内存中修改游戏函数。**杀毒软件可能误报**；游戏或显卡驱动更新后可能需要重新生成特征码或暂时停用。
 
-### 安装程序细节
+### 安装
 
-`安裝-Install.bat`（实际工作由 `tools\install.ps1` 完成）：双击 → 1 安装或更新 / 2 卸载 / 3 生成报错文件。
+`安裝-Install.bat`：双击后 → 输入 1 安装或更新 / 2 卸载 / 3 生成报错文件。
 
-- 自动查找游戏目录：安装包的上一层（解压在游戏目录里时）、Steam 注册表 + `libraryfolders.vdf` 中的每个游戏库；找不到就请用户把文件夹拖进窗口。选错选项或文件夹会重新询问（3 次）。
-- 检查：确实存在 `TransportFever3.exe`、游戏没有在运行、两个 DLL 都是 x64 且确认属于本插件（看 DLL 版本信息的 ProductName：`Better Snap Option`，或旧名 `TF3 Snap Options`；0.2.1 及更早版本看只有它们才有的字符串）。
-- **游戏目录里已有别人的 `vulkan-1.dll`**（其他模组）：先说明是什么文件、询问是否继续，备份到 `tf3snap\backup\vulkan-1.<时间>.dll`（校验哈希），记录到 `tf3snap\install.json`；卸载时自动还原。
-- 先把新文件复制为 `*.tf3new` 并校验 SHA256，再一起替换；中途失败就把已替换的文件还原。
-- 更新不会动 `tf3snap.ini`、`tf3snap_text_*.ini` 和日志。卸载时会询问是否连设置一起删除（默认保留）。
-- 界面语言：已安装过就跟随面板设置（`lang=`），否则跟随 Windows 显示语言；四种语言都有。
-- **报错文件**：任何失败都会自动在 .bat 旁边写入 `報錯.log`（写不了就写到 `%TEMP%`），选 3 也会生成。内容：安装过程、错误与堆栈、系统 / PowerShell 版本、安装包与游戏目录中两个 DLL 的版本与哈希、游戏 exe 的哈希、游戏目录中的其他 DLL、`tf3snap.ini` / `proxy_error.txt` / 最近 5 次游玩的日志、游戏自己的 `crash_dump`、Windows 中 14 天内该游戏的崩溃事件。
-- 参数（不询问）：`-Action Install|Uninstall|Report -GameDir <文件夹> -SourceRoot <来源> -Yes -RemoveData`。带引号的路径**结尾不要加 `\`**：`"D:\Games\TF3\"` 中的 `\"` 会被 Windows 命令行当成转义的引号。
+- 自动查找游戏目录：安装包的上一层、Steam 注册表 + `libraryfolders.vdf` 中的每个游戏库；找不到就请把游戏目录拖进窗口。选错选项或文件夹会重新询问。
 
-也可以手动安装：`vulkan-1.dll` 放在游戏目录（与 `TransportFever3.exe` 同一层），`tf3snap.dll` 放在其中的 `tf3snap\`。
-暂时停用：在 `tf3snap\` 内新建空文件 `disabled`。设置保存在 `tf3snap\tf3snap.ini`。
+也可以手动安装：`vulkan-1.dll` 放在游戏目录（与 `TransportFever3.exe` 同一层），然后把 `tf3snap\` 文件夹放进游戏主目录里。
 
 ### 授权
 
@@ -199,38 +183,16 @@ A guide type that is switched off is neither shown nor snapped to.
   (false positive)**; after a game or graphics driver update the signatures may need to be regenerated, or the tool
   disabled for a while.
 
-### Installer details
+### Install
 
-`安裝-Install.bat` (the actual work is done by `tools\install.ps1`): double-click → 1 install or update / 2 uninstall /
-3 write an error report.
+`安裝-Install.bat`: double-click it, then enter 1 to install or update / 2 to uninstall / 3 to write an error report.
 
-- Finding the game folder: the folder above the package (when it was extracted inside the game folder) and every
-  library from the Steam registry + `libraryfolders.vdf`; if none is found, the user is asked to drag the folder into
-  the window. A wrong menu choice or folder is asked again (3 tries).
-- Checks: `TransportFever3.exe` really exists, the game is not running, and both DLLs are x64 and really belong to this
-  plugin (ProductName in the DLL version info: `Better Snap Option`, or the old name `TF3 Snap Options`; for 0.2.1 and
-  older, a string only those builds contain).
-- **Someone else's `vulkan-1.dll` already in the game folder** (another mod): the installer explains what the file is
-  and asks whether to continue, backs it up to `tf3snap\backup\vulkan-1.<time>.dll` (hash verified) and records it in
-  `tf3snap\install.json`; uninstalling puts it back automatically.
-- New files are first copied as `*.tf3new` and SHA256-verified, then swapped in together; if anything fails halfway,
-  the files already replaced are restored.
-- Updates leave `tf3snap.ini`, `tf3snap_text_*.ini` and the logs alone. Uninstalling asks whether to delete the
-  settings too (kept by default).
-- Installer language: follows the panel setting (`lang=`) if already installed, otherwise the Windows display
-  language; all four languages are available.
-- **Error report**: any failure automatically writes `報錯.log` next to the .bat (to `%TEMP%` if that is not writable);
-  choice 3 writes one too. It contains: the installation steps, errors and stack traces, Windows / PowerShell versions,
-  versions and hashes of both DLLs in the package and in the game folder, the hash of the game exe, other DLLs in the
-  game folder, `tf3snap.ini` / `proxy_error.txt` / the logs of the last 5 sessions, the game's own `crash_dump`, and
-  the crash events Windows recorded for this game in the last 14 days.
-- Parameters (no questions asked):
-  `-Action Install|Uninstall|Report -GameDir <folder> -SourceRoot <source> -Yes -RemoveData`.
-  **Do not end a quoted path with `\`**: in `"D:\Games\TF3\"` the Windows command line reads `\"` as an escaped quote.
+- Finding the game folder: the folder above the package and every library from the Steam registry +
+  `libraryfolders.vdf`; if none is found, drag the game folder into the window. A wrong menu choice or folder is
+  asked again.
 
-Manual install works too: put `vulkan-1.dll` in the game folder (next to `TransportFever3.exe`) and `tf3snap.dll` in
-the `tf3snap\` folder inside it.
-Disable for a while: create an empty file named `disabled` in `tf3snap\`. Settings are stored in `tf3snap\tf3snap.ini`.
+Manual install works too: put `vulkan-1.dll` in the game folder (next to `TransportFever3.exe`), then put the
+`tf3snap\` folder into the game's main folder.
 
 ### License
 
@@ -287,21 +249,13 @@ Transport Fever 3 の道路建設を補助するスナップツールです。TF
 - 本ツールは非公式ツールであり、Urban Games、Paradox Interactive とは一切関係ありません。使用によりクラッシュやデータ破損などが起きる可能性があります。自己責任でご利用ください。互換性・安定性・アカウントの安全は保証しません。
 - 本ツールは独自の DLL をゲームに読み込ませ、メモリ上でゲームの関数を書き換えます。**ウイルス対策ソフトが誤検知する可能性があります**。ゲームやグラフィックドライバーの更新後は、シグネチャの再生成や一時的な無効化が必要になることがあります。
 
-### インストーラーの詳細
+### インストール
 
-`安裝-Install.bat`（実際の処理は `tools\install.ps1`）：ダブルクリック → 1 インストール / 更新、2 アンインストール、3 エラーレポートを作成。
+`安裝-Install.bat`：ダブルクリックして、1（インストール / 更新）、2（アンインストール）、3（エラーレポートを作成）のいずれかを入力します。
 
-- ゲームフォルダーの自動検出：パッケージの 1 つ上のフォルダー（ゲームフォルダー内に展開した場合）、Steam のレジストリと `libraryfolders.vdf` にある各ライブラリ。見つからない場合は、フォルダーをウィンドウにドラッグしてもらいます。メニューやフォルダーの選択を誤ると聞き直します（3 回まで）。
-- チェック：`TransportFever3.exe` が実在すること、ゲームが起動していないこと、2 つの DLL がどちらも x64 で本プラグインのものであること（DLL のバージョン情報の ProductName が `Better Snap Option`、または旧名 `TF3 Snap Options`。0.2.1 以前はそのビルドにしかない文字列で判定）。
-- **ゲームフォルダーに他人の `vulkan-1.dll` がすでにある場合**（他の MOD）：どのファイルかを説明して続行するか確認し、`tf3snap\backup\vulkan-1.<日時>.dll` にバックアップ（ハッシュを検証）して `tf3snap\install.json` に記録します。アンインストール時に自動で元に戻します。
-- 新しいファイルはまず `*.tf3new` としてコピーして SHA256 を検証し、それからまとめて置き換えます。途中で失敗した場合は、置き換え済みのファイルを元に戻します。
-- 更新では `tf3snap.ini`、`tf3snap_text_*.ini`、ログには触れません。アンインストール時は設定も削除するか確認します（既定は残す）。
-- インストーラーの言語：インストール済みならパネルの設定（`lang=`）に従い、そうでなければ Windows の表示言語に従います。4 言語すべてに対応しています。
-- **エラーレポート**：何かが失敗すると自動で .bat の横に `報錯.log` を書き出し（書き込めない場合は `%TEMP%`）、3 を選んでも作成されます。内容：インストールの経過、エラーとスタックトレース、Windows / PowerShell のバージョン、パッケージとゲームフォルダーにある 2 つの DLL のバージョンとハッシュ、ゲーム exe のハッシュ、ゲームフォルダー内のその他の DLL、`tf3snap.ini` / `proxy_error.txt` / 直近 5 回のプレイのログ、ゲーム自身の `crash_dump`、Windows に記録された過去 14 日間のこのゲームのクラッシュイベント。
-- パラメーター（質問なしで実行）：`-Action Install|Uninstall|Report -GameDir <フォルダー> -SourceRoot <ソース> -Yes -RemoveData`。引用符で囲んだパスの**末尾に `\` を付けないでください**：`"D:\Games\TF3\"` の `\"` は Windows のコマンドラインでエスケープされた引用符として扱われます。
+- ゲームフォルダーの自動検出：パッケージの 1 つ上のフォルダー、Steam のレジストリと `libraryfolders.vdf` にある各ライブラリ。見つからない場合は、ゲームフォルダーをウィンドウにドラッグしてください。メニューやフォルダーの選択を誤ると聞き直します。
 
-手動でもインストールできます：`vulkan-1.dll` をゲームフォルダー（`TransportFever3.exe` と同じ階層）に、`tf3snap.dll` をその中の `tf3snap\` に置きます。
-一時的に無効化：`tf3snap\` 内に `disabled` という空ファイルを作成します。設定は `tf3snap\tf3snap.ini` に保存されます。
+手動でもインストールできます：`vulkan-1.dll` をゲームフォルダー（`TransportFever3.exe` と同じ階層）に置き、`tf3snap\` フォルダーをゲームのメインフォルダーに入れます。
 
 ### ライセンス
 
