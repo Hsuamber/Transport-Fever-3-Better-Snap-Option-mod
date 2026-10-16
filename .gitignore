@@ -1,0 +1,10 @@
+# Build output, the toolchain and machine-specific settings (see README "資料夾結構")
+build/
+dist/
+toolchain/
+*.local.txt
+__pycache__/
+*.pyc
+
+# Reports the installer writes next to itself when run from release/
+報錯.log

@@ -1,0 +1,4 @@
+# Store every file byte for byte: .bat / .ps1 / release README.txt are CRLF (cmd, PowerShell 5.1 and Notepad want
+# that), sources and Markdown are LF.  No end-of-line conversion either way; diffs still work.
+* -text
+*.png binary

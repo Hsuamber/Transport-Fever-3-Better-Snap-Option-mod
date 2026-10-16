@@ -1,0 +1,12 @@
+Better Snap Option - third-party components
+
+tf3snap.dll contains code from these projects; their license texts are in this folder.
+
+  Dear ImGui 1.92.9b   https://github.com/ocornut/imgui         MIT License          -> Dear-ImGui.txt
+  MinHook 1.3.4        https://github.com/TsudaKageyu/minhook   BSD 2-Clause License -> MinHook.txt
+                       (includes Hacker Disassembler Engine by Vyacheslav Patkov, BSD-style, same file)
+
+Both DLLs are built with llvm-mingw (https://github.com/mstorsjo/llvm-mingw).  The C++ runtime linked into
+them (LLVM libc++ / libunwind / compiler-rt) is under the Apache License 2.0 with LLVM Exception, whose
+exception means compiled programs need no notice for it; the mingw-w64 runtime is under its own permissive
+terms (see the mingw-w64 project's COPYING files).
