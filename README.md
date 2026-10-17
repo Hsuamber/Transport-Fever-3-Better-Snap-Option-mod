@@ -139,7 +139,7 @@ switch each kind of snapping and guide line on or off, adjust the snap range and
 
 1. Download the latest `Better-Snap-Option-v<version>.zip` from [Releases](../../releases), close the game completely
    and extract the zip to any folder.
-2. Double-click `安裝-Install.bat`, choose 1 and confirm the game folder (Steam installs are found automatically;
+2. Double-click `安裝-Install.bat`, enter 1 and confirm the game folder (Steam installs are found automatically;
    otherwise drag the folder that contains `TransportFever3.exe` into the window).
 3. Start the game and get into an actual game (not just the main menu); the panel appears as soon as you open the road
    or track tool. The language can be changed at the bottom of the panel.
@@ -213,7 +213,7 @@ Transport Fever 3 の道路建設を補助するスナップツールです。TF
 ### ダウンロードとインストール
 
 1. [Releases](../../releases) から最新の `Better-Snap-Option-v<バージョン>.zip` をダウンロードし、ゲームを完全に終了してから任意のフォルダーに展開します。
-2. `安裝-Install.bat` をダブルクリックし、1 を選んでゲームフォルダーを確認します（Steam 版は自動で見つかります。見つからない場合は `TransportFever3.exe` があるフォルダーをウィンドウにドラッグしてください）。
+2. `安裝-Install.bat` をダブルクリックし、1 を入力してゲームフォルダーを確認します（Steam 版は自動で見つかります。見つからない場合は `TransportFever3.exe` があるフォルダーをウィンドウにドラッグしてください）。
 3. ゲームを起動して実際のプレイ画面に入り（メインメニューではなく）、道路または線路ツールを開くとパネルが表示されます。言語はパネル下部で切り替えられます。
 
 更新：新しいバージョンのインストーラーをもう一度実行します。設定とパネルの文字は保持されます。アンインストール：同じインストーラーで 2 を選びます。
