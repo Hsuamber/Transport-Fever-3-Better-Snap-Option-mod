@@ -1,7 +1,6 @@
 // The panel: a small always-on-top window with its own D3D11 device + Dear ImGui.
 // It does NOT touch the game's renderer (renderer-agnostic), shows only while the road / track tool is
-// open, and auto-hides on the main menu / ESC pause menu / when the user alt-tabs away.  Adapted from
-// imgui's example_win32_directx11.
+// open and the game is in front (see HideReason).  Adapted from imgui's example_win32_directx11.
 #include "tf3snap.h"
 
 #include <d3d11.h>
@@ -343,20 +342,21 @@ static bool CursorOverPanel() {
     return GetCursorPos(&c) && GetWindowRect(g_hwnd, &r) && PtInRect(&r, c);
 }
 
-static bool ShouldShow(bool shown) {
-    // Always, not an option (0.2.0's "只在遊戲中顯示" checkbox is gone): the tool can stay open behind the ESC
-    // menu or while the user is in another program, and a top-most panel must not cover those.  InGame() only
-    // matters when the tool check is off or unavailable.
-    if (!InGame() || MenuPauseOpen()) return false;
+// Why the panel should be hidden (it goes to the log), or nullptr when it should show.  The panel follows the
+// road / track tool and nothing else of the game's state: no ESC / pause test (0.3.1's hid it whenever paused).
+static const char* HideReason(bool shown) {
+    // A top-most panel must not cover other programs: only while the game window or the panel is in front.
     DWORD fgpid = 0;
     GetWindowThreadProcessId(GetForegroundWindow(), &fgpid);
-    if (fgpid != GetCurrentProcessId()) return false;   // game window or our own panel is active (both are us)
-    if (g_opt.toolOnly.load() && g_opt.toolDetect.load() && !BuilderToolOpen(kToolGraceMs)) {
+    if (fgpid != GetCurrentProcessId()) return "game not in front";
+    if (g_opt.toolOnly.load() && g_opt.toolDetect.load()) {
+        if (BuilderToolOpen(kToolGraceMs)) return nullptr;
         // Never vanish under the user's hand: a visible panel stays while it has focus (it was clicked, and
         // the game may step less while it is in the background) or the mouse is on it.
-        return shown && (GetForegroundWindow() == g_hwnd || CursorOverPanel());
+        if (shown && (GetForegroundWindow() == g_hwnd || CursorOverPanel())) return nullptr;
+        return "road / track tool closed";
     }
-    return true;
+    return InGame() ? nullptr : "not in a game";   // tool check off or unavailable: whenever a save is loaded
 }
 
 void OverlayRun() {
@@ -428,10 +428,13 @@ void OverlayRun() {
 
         if (g_dirty) { g_dirty = false; savePending = true; saveAt = now + kSaveDelayMs; }
 
-        bool show = ShouldShow(shown);
+        const char* hideWhy = HideReason(shown);
+        const bool show = !hideWhy;
         if (show != shown) {
             ShowWindow(g_hwnd, show ? SW_SHOWNOACTIVATE : SW_HIDE);
             shown = show;
+            if (show) Logf("panel shown");
+            else Logf("panel hidden: %s", hideWhy);
         }
         if (savePending && (!show || now >= saveAt)) { SaveConfig(); savePending = false; }
         if (!show || !g_rtv) { Sleep(60); continue; }

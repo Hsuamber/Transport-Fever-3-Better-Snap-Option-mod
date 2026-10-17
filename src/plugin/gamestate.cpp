@@ -1,16 +1,14 @@
-// Read the game's own state so the overlay can hide itself when it should.
-// Both facts were verified live (see re/NOTES.md section 12):
-//   g_gameUI  (exe + 0x403C008): null on main menu / loading, non-null once a save is in play.
-//   *(g_gameUI + 0xB90) (u8)   : 1 while the ESC in-game ("遊戲暫停中") menu is open, else 0.
+// Read the game's own state: whether a save is in play (used only when the tool check is off or unavailable).
+//   g_gameUI (exe + 0x403C008): null on main menu / loading, non-null once a save is in play (re/NOTES.md 12).
+// Nothing else is read.  0.3.1 also hid the panel on *(g_gameUI + 0xB90), taken for "ESC menu open", but the
+// game sets it on any pause (the speed bar's pause button too), so the panel vanished whenever paused.
 #include "tf3snap.h"
 
 namespace tf3 {
 
-// RVAs are from the reference build.  They are plain data globals, not code, so they are not
-// signature-scannable; if a game update moves them the worst case is the overlay not auto-hiding,
-// never a crash (every dereference is guarded by Readable()).
+// RVA from the reference build.  A plain data global, not code, so not signature-scannable; if a game update
+// moves it the worst case is the panel not hiding on the main menu, never a crash (guarded by Readable()).
 static constexpr uintptr_t RVA_G_GAMEUI = 0x403C008;
-static constexpr uintptr_t OFF_MENU_PAUSE = 0xB90;
 
 bool Readable(uintptr_t addr, size_t len) {
     if (!addr) return false;
@@ -23,21 +21,12 @@ bool Readable(uintptr_t addr, size_t len) {
     return addr + len <= end;
 }
 
-static uintptr_t GameUIPtr() {
+bool InGame() {
     uintptr_t base = GameBase();
-    if (!base) return 0;
+    if (!base) return false;
     uintptr_t slot = base + RVA_G_GAMEUI;
-    if (!Readable(slot, sizeof(uintptr_t))) return 0;
-    uintptr_t ui = *reinterpret_cast<uintptr_t*>(slot);
-    return Readable(ui, OFF_MENU_PAUSE + 1) ? ui : 0;
-}
-
-bool InGame() { return GameUIPtr() != 0; }
-
-bool MenuPauseOpen() {
-    uintptr_t ui = GameUIPtr();
-    if (!ui) return false;
-    return *reinterpret_cast<uint8_t*>(ui + OFF_MENU_PAUSE) != 0;
+    if (!Readable(slot, sizeof(uintptr_t))) return false;
+    return Readable(*reinterpret_cast<uintptr_t*>(slot), sizeof(uintptr_t));
 }
 
 }  // namespace tf3

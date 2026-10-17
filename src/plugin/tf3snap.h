@@ -3,8 +3,7 @@
 // Option B design: an in-process plugin (loaded by the vulkan-1.dll proxy) that
 //  - installs MinHook detours on the game's snapping functions (hooks.cpp), and
 //  - draws a small borderless top-most ImGui window of its own D3D11 device (overlay.cpp),
-//    which shows only while the road / track tool is open and auto-hides on the main menu / ESC pause
-//    menu / when the game is not focused.
+//    which shows while the road / track tool is open and the game is in front (nothing else).
 // Nothing is written to the game's files; unload (remove the proxy or the 'disabled' marker) restores all.
 #pragma once
 #ifndef WIN32_LEAN_AND_MEAN
@@ -88,7 +87,6 @@ bool ResolveTargets();       // fills g_t via signatures; false if any required 
 
 // ---- game state (gamestate.cpp) -------------------------------------------------------------------
 bool InGame();           // a save is loaded (g_gameUI != null)
-bool MenuPauseOpen();     // ESC in-game menu is open (*g_gameUI + 0xB90)
 bool Readable(uintptr_t addr, size_t len);   // committed, readable, not a guard page (VirtualQuery)
 
 // ---- hooks (hooks.cpp) ----------------------------------------------------------------------------
