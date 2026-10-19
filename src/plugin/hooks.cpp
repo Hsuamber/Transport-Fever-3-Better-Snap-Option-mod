@@ -20,6 +20,18 @@
 
 namespace tf3 {
 
+// Committed, readable, not a guard page (VirtualQuery): the cross guide checks game pointers with this first.
+static bool Readable(uintptr_t addr, size_t len) {
+    if (!addr) return false;
+    MEMORY_BASIC_INFORMATION mbi;
+    if (!VirtualQuery(reinterpret_cast<void*>(addr), &mbi, sizeof(mbi))) return false;
+    if (mbi.State != MEM_COMMIT) return false;
+    DWORD ok = PAGE_READONLY | PAGE_READWRITE | PAGE_EXECUTE_READ | PAGE_EXECUTE_READWRITE | PAGE_WRITECOPY;
+    if (!(mbi.Protect & ok) || (mbi.Protect & PAGE_GUARD)) return false;
+    uintptr_t end = reinterpret_cast<uintptr_t>(mbi.BaseAddress) + mbi.RegionSize;
+    return addr + len <= end;
+}
+
 // per-UI-thread state (the builder cursor path is single-threaded; thread_local keeps it clean)
 static thread_local int t_depth = 0;       // >0 while inside CalcCursorPoint
 static thread_local bool t_fresh = false;  // true until the shared scoring ctx is tuned once per find
@@ -590,10 +602,16 @@ static void DrawCross(void* builder, const Snap& s) {
     fDraw(rend, &vec, 0.6f, colA, colB);
 }
 
+// "The road / track tool is open" heartbeat: when StreetBuilder::Step or UpdateRenderer last ran (see below).
+static std::atomic<uint64_t> s_stepAt{0};
+
 // 58a100 UpdateRenderer(builder, ..): after the builder has queued its own preview lines for the frame.
+// Step calls it once per frame (re/NOTES.md 13.3), so it is also hooked without the cross guide: it is the
+// heartbeat when Step's signature is missing (the newer Steam build of GitHub issue #1).
 static void* hRenderer(void* builder, void* a1) {
+    s_stepAt.store(GetTickCount64(), std::memory_order_relaxed);
     void* ret = oRenderer(builder, a1);
-    if (!on(g_opt.guideCross) || !on(g_opt.showGuides) || s_crossBroken) return ret;
+    if (!g_opt.crossOk.load() || !on(g_opt.guideCross) || !on(g_opt.showGuides) || s_crossBroken) return ret;
     Snap s;
     {
         std::lock_guard<std::mutex> lk(s_snapMx);
@@ -612,7 +630,6 @@ static void* hRenderer(void* builder, void* a1) {
 // returning void* only so whatever is in RAX is handed back untouched, like every other detour here.
 typedef void* (*StepFn)(void*, void*, float);
 static StepFn oStep = nullptr;
-static std::atomic<uint64_t> s_stepAt{0};
 static void* hStep(void* self, void* renderer, float dt) {
     s_stepAt.store(GetTickCount64(), std::memory_order_relaxed);
     return oStep(self, renderer, dt);
@@ -647,7 +664,8 @@ bool InstallHooks() {
     ok &= create(g_t.getSnapTangents, (void*)hTangents, (void**)&oTangents, "GetSnapTangents");
     if (!ok) { Logf("some hooks failed to create; enabling none"); MH_Uninitialize(); return false; }
 
-    // optional: the cross guide (ResolveTargets already decided crossOk from the signatures)
+    // optional: the cross guide (ResolveTargets already decided crossOk from the signatures), and the
+    // UpdateRenderer hook it draws from, which is also the tool heartbeat's stand-in for Step
     if (g_opt.crossOk.load()) {
         fTypeIndex = reinterpret_cast<TypeIndexFn>(g_t.getComponentTypeIndex);
         fComp = reinterpret_cast<CompFn>(g_t.componentData);
@@ -655,18 +673,21 @@ bool InstallHooks() {
         fSnapPos = reinterpret_cast<SnapPosFn>(g_t.snapPointPos);
         fStraight = reinterpret_cast<StraightFn>(g_t.makeStraightEdge);
         fDraw = reinterpret_cast<DrawFn>(g_t.drawEdges);
-        if (!create(g_t.updateRenderer, (void*)hRenderer, (void**)&oRenderer, "UpdateRenderer")) {
-            g_opt.crossOk = false;
-            Logf("cross guide off: UpdateRenderer hook failed");
-        }
+    }
+    const bool renderer = create(g_t.updateRenderer, (void*)hRenderer, (void**)&oRenderer, "UpdateRenderer");
+    if (!renderer && g_opt.crossOk.load()) {
+        g_opt.crossOk = false;
+        Logf("cross guide off: UpdateRenderer hook failed");
     }
     // optional: the panel shows only while the road / track tool is open
     const bool step = create(g_t.streetBuilderStep, (void*)hStep, (void**)&oStep, "StreetBuilderStep");
-    if (!step) Logf("tool detection off: the panel ignores 'only with the road / track tool'");
+    const bool detect = step || renderer;
+    if (!step && renderer) Logf("tool detection: UpdateRenderer stands in for StreetBuilderStep");
+    if (!detect) Logf("tool detection off: the panel ignores 'only with the road / track tool'");
     if (MH_EnableHook(MH_ALL_HOOKS) != MH_OK) { Logf("MH_EnableHook failed"); MH_Uninitialize(); return false; }
-    g_opt.toolDetect = step;
+    g_opt.toolDetect = detect;
     Logf("all hooks installed (cross guide %s, tool detection %s)", g_opt.crossOk.load() ? "on" : "off",
-         step ? "on" : "off");
+         detect ? "on" : "off");
     return true;
 }
 

@@ -153,6 +153,12 @@ static uintptr_t FindTypeInfo(const char* decorated) {
 bool ResolveTargets() {
     struct Entry { const char* id; uintptr_t* out; uint32_t refRva; const char* pat; };
     g_t = {};
+    {   // which build this is, so a report from a newer game shows it (sigs.inc names the reference build)
+        auto dos = reinterpret_cast<const IMAGE_DOS_HEADER*>(GameBase());
+        auto nt = reinterpret_cast<const IMAGE_NT_HEADERS*>(GameBase() + dos->e_lfanew);
+        Logf("game exe: TimeDateStamp 0x%08lx, SizeOfImage 0x%lx", (unsigned long)nt->FileHeader.TimeDateStamp,
+             (unsigned long)nt->OptionalHeader.SizeOfImage);
+    }
 #define SIG(id, rva, pat) Entry{#id, nullptr, (uint32_t)(rva), pat},
     // Map the generated SIG rows to the fields we need.
     struct Row { const char* id; uint32_t refRva; const char* pat; };
@@ -214,7 +220,9 @@ bool ResolveTargets() {
     Logf("cross guide targets: %s", cross ? "all found" : "MISSING some (cross guide off, rest unaffected)");
     if (!g_t.tangentsDrawCallSite) Logf("guide draw call site not found: 顯示引導線 has no effect");
 
-    // Optional: the panel follows the road / track tool (missing -> the panel just ignores that setting).
+    // Optional: the panel follows the road / track tool.  UpdateRenderer runs once per Step, so when Step is
+    // missing (as on the newer Steam build of GitHub issue #1) hooks.cpp falls back on it; with neither the
+    // panel stays up while the game is in front.
     g_t.streetBuilderStep = get("StreetBuilderStep");
     return ok;
 }

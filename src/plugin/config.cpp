@@ -70,7 +70,7 @@ void LoadConfig() {
         else if (k == "guideStraight") g_opt.guideStraight = bv;
         else if (k == "guideCross") g_opt.guideCross = bv;
         else if (k == "angle90") oldAngle90 = bv;                             // 0.1.x: now the 90 deg grid
-        else if (k == "toolOnly") g_opt.toolOnly = bv;   // (0.2.0's "autohide" is always on now: ignored)
+        // ignored: "toolOnly" (0.2.1-0.3.2; the panel always follows the tool now) and 0.2.0's "autohide"
         else if (k == "lang") { const int l = LangFromCode(v); if (l >= 0) g_opt.lang = l; }
         else if (k == "lengthStep") g_opt.lengthStep = (float)atof(v.c_str());
         else if (k == "scale") g_opt.scale = (float)atof(v.c_str());
@@ -89,12 +89,12 @@ void SaveConfig() {
                      "existing=%d\r\nlength=%d\r\nlengthStep=%.3g\r\nsides=%d\r\nlanes=%d\r\n"
                      "snapGuides=%d\r\nnearby=%d\r\nscale=%.3g\r\n"
                      "showGuides=%d\r\nguideAngle=%d\r\ngrid=%d\r\nguideStraight=%d\r\nguideCross=%d\r\n"
-                     "toolOnly=%d\r\nlang=%s\r\npanelX=%d\r\npanelY=%d\r\n",
+                     "lang=%s\r\npanelX=%d\r\npanelY=%d\r\n",
                      (int)g_opt.existing.load(), (int)g_opt.length.load(), g_opt.lengthStep.load(),
                      (int)g_opt.sides.load(), (int)g_opt.lanes.load(), (int)g_opt.snapGuides.load(),
                      (int)g_opt.nearby.load(), g_opt.scale.load(), (int)g_opt.showGuides.load(),
                      (int)g_opt.guideAngle.load(), g_opt.grid.load(), (int)g_opt.guideStraight.load(),
-                     (int)g_opt.guideCross.load(), (int)g_opt.toolOnly.load(), LangCode(g_opt.lang.load()),
+                     (int)g_opt.guideCross.load(), LangCode(g_opt.lang.load()),
                      g_opt.panelX.load(), g_opt.panelY.load());
     if (n <= 0) return;
     HANDLE h = CreateFileW(ConfigPath().c_str(), GENERIC_WRITE, FILE_SHARE_READ, nullptr,

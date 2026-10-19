@@ -55,7 +55,7 @@ echo [3/3] plugin tf3snap.dll  (compiles ImGui too: about 1-2 minutes)
 echo == [3/3] plugin>> "%LOG%"
 "%RC%" -I"%HERE%src\plugin" "%HERE%src\plugin\tf3snap.rc" -O coff -o "%OUT%\tf3snap_res.o" >> "%LOG%" 2>&1 || goto :err
 "%CLANG%" -O2 -shared -std=c++17 -o "%OUT%\tf3snap.dll" ^
-  "%HERE%src\plugin\main.cpp" "%HERE%src\plugin\sigscan.cpp" "%HERE%src\plugin\gamestate.cpp" ^
+  "%HERE%src\plugin\main.cpp" "%HERE%src\plugin\sigscan.cpp" ^
   "%HERE%src\plugin\hooks.cpp" "%HERE%src\plugin\config.cpp" "%HERE%src\plugin\log.cpp" ^
   "%HERE%src\plugin\overlay.cpp" "%HERE%src\plugin\text.cpp" ^
   "%IMGUI%\imgui.cpp" "%IMGUI%\imgui_draw.cpp" "%IMGUI%\imgui_tables.cpp" "%IMGUI%\imgui_widgets.cpp" ^

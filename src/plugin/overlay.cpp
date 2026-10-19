@@ -307,11 +307,7 @@ static void DrawPanel() {
     ImGui::SameLine();
     if (ImGui::Button(b3)) { ResetToStock(); g_dirty = true; }
 
-    const bool canDetect = g_opt.toolDetect.load();
-    if (!canDetect) ImGui::BeginDisabled();
-    Check("toolOnly", g_opt.toolOnly);
-    if (!canDetect) ImGui::EndDisabled();
-    if (g_opt.hooksOk.load() && !canDetect)
+    if (g_opt.hooksOk.load() && !g_opt.toolDetect.load())
         ImGui::TextColored(ImVec4(1, 0.6f, 0.3f, 1), "%s", T("status.notool"));
     LanguageCombo();
 
@@ -332,7 +328,7 @@ static void DrawPanel() {
     }
 }
 
-// The road / track tool counts as open while StreetBuilder::Step ran within this long; it runs every frame,
+// The road / track tool counts as open while Step / UpdateRenderer ran within this long; they run every frame,
 // so this only rides over load hitches and is how long the panel lingers after the tool is closed.
 static constexpr uint64_t kToolGraceMs = 500;
 
@@ -343,20 +339,21 @@ static bool CursorOverPanel() {
 }
 
 // Why the panel should be hidden (it goes to the log), or nullptr when it should show.  The panel follows the
-// road / track tool and nothing else of the game's state: no ESC / pause test (0.3.1's hid it whenever paused).
+// road / track tool and nothing else of the game's state: no ESC / pause test (0.3.1's hid it whenever paused),
+// no "a save is loaded" test and no option to show it without the tool (both gone in 0.3.3: the save test read
+// a fixed address that a game update moved, so the panel never showed - GitHub issue #1).
 static const char* HideReason(bool shown) {
     // A top-most panel must not cover other programs: only while the game window or the panel is in front.
     DWORD fgpid = 0;
     GetWindowThreadProcessId(GetForegroundWindow(), &fgpid);
     if (fgpid != GetCurrentProcessId()) return "game not in front";
-    if (g_opt.toolOnly.load() && g_opt.toolDetect.load()) {
-        if (BuilderToolOpen(kToolGraceMs)) return nullptr;
-        // Never vanish under the user's hand: a visible panel stays while it has focus (it was clicked, and
-        // the game may step less while it is in the background) or the mouse is on it.
-        if (shown && (GetForegroundWindow() == g_hwnd || CursorOverPanel())) return nullptr;
-        return "road / track tool closed";
-    }
-    return InGame() ? nullptr : "not in a game";   // tool check off or unavailable: whenever a save is loaded
+    // Neither Step nor UpdateRenderer hooked: no way to tell, so always (the panel says so: status.notool).
+    if (!g_opt.toolDetect.load()) return nullptr;
+    if (BuilderToolOpen(kToolGraceMs)) return nullptr;
+    // Never vanish under the user's hand: a visible panel stays while it has focus (it was clicked, and
+    // the game may step less while it is in the background) or the mouse is on it.
+    if (shown && (GetForegroundWindow() == g_hwnd || CursorOverPanel())) return nullptr;
+    return "road / track tool closed";
 }
 
 void OverlayRun() {
@@ -399,6 +396,9 @@ void OverlayRun() {
     bool shown = false, busy = false, savePending = false;
     uint64_t saveAt = 0, lastTextPoll = 0;
     bool toolWasOpen = false;
+    // Every change of the reason goes to the log, the first one too: 0.3.2 only logged show / hide flips, so a
+    // panel that never showed left nothing to go on (GitHub issue #1).  Reasons are HideReason's literals.
+    const char* lastWhy = "";
     while (!g_stop) {
         if (shown && !busy) MsgWaitForMultipleObjectsEx(0, nullptr, kIdleMs, QS_ALLINPUT, MWMO_INPUTAVAILABLE);
         MSG msg;
@@ -433,8 +433,11 @@ void OverlayRun() {
         if (show != shown) {
             ShowWindow(g_hwnd, show ? SW_SHOWNOACTIVATE : SW_HIDE);
             shown = show;
+        }
+        if (hideWhy != lastWhy) {
             if (show) Logf("panel shown");
             else Logf("panel hidden: %s", hideWhy);
+            lastWhy = hideWhy;
         }
         if (savePending && (!show || now >= saveAt)) { SaveConfig(); savePending = false; }
         if (!show || !g_rtv) { Sleep(60); continue; }

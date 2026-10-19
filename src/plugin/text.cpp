@@ -39,7 +39,6 @@ static const DefaultText kZhTW[] = {
     {"btn.allOn", "全部開"},
     {"btn.allOff", "全部關"},
     {"btn.reset", "恢復遊戲預設"},
-    {"toolOnly", "只在道路 / 鐵路工具開啟時顯示"},
     {"lang", "語言"},
 };
 
@@ -67,7 +66,6 @@ static const DefaultText kZhCN[] = {
     {"btn.allOn", "全部开启"},
     {"btn.allOff", "全部关闭"},
     {"btn.reset", "恢复游戏默认"},
-    {"toolOnly", "仅在道路 / 铁路工具打开时显示"},
     {"lang", "语言"},
 };
 
@@ -95,7 +93,6 @@ static const DefaultText kEn[] = {
     {"btn.allOn", "All on"},
     {"btn.allOff", "All off"},
     {"btn.reset", "Reset to game defaults"},
-    {"toolOnly", "Show only while the road / track tool is open"},
     {"lang", "Language"},
 };
 
@@ -123,7 +120,6 @@ static const DefaultText kJa[] = {
     {"btn.allOn", "すべてオン"},
     {"btn.allOff", "すべてオフ"},
     {"btn.reset", "ゲーム既定に戻す"},
-    {"toolOnly", "道路 / 線路ツールを開いている時のみ表示"},
     {"lang", "言語"},
 };
 

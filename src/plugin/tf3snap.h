@@ -45,13 +45,12 @@ struct Options {
     std::atomic<bool> guideStraight{true};  // straight-on along existing roads (existing flag 1), original
     std::atomic<bool> guideCross{true};     // ours: perpendicular through nearby road ends
     // panel
-    std::atomic<bool> toolOnly{true};   // only while the road / track tool is open
     std::atomic<int> lang{kLangZhTW};   // panel language (kLang*)
     std::atomic<int> panelX{40}, panelY{120};
     // status (not saved)
     std::atomic<bool> hooksOk{false};     // signatures matched and detours installed
     std::atomic<bool> crossOk{false};     // everything the cross guide needs was found
-    std::atomic<bool> toolDetect{false};  // StreetBuilder::Step is hooked: we can tell when the tool is open
+    std::atomic<bool> toolDetect{false};  // Step or UpdateRenderer is hooked: we can tell when the tool is open
 };
 extern Options g_opt;
 // What "恢復遊戲預設" restores: the game's own behaviour (the cross guide is ours, so it goes off).
@@ -78,21 +77,17 @@ struct Targets {
         heightAt, snapPointPos;
     uintptr_t tangentsDrawCallSite;   // return address inside updateRenderer that calls getSnapTangents
     uintptr_t baseEdgeTypeInfo;       // ecs::component::BaseEdge type_info (found by its RTTI name)
-    // optional (panel shows only while the road / track tool is open)
+    // optional (panel shows only while the road / track tool is open; updateRenderer stands in if missing)
     uintptr_t streetBuilderStep;
 };
 extern Targets g_t;
 bool ResolveTargets();       // fills g_t via signatures; false if any required one is missing
                              // (the optional ones only switch off g_opt.crossOk)
 
-// ---- game state (gamestate.cpp) -------------------------------------------------------------------
-bool InGame();           // a save is loaded (g_gameUI != null)
-bool Readable(uintptr_t addr, size_t len);   // committed, readable, not a guard page (VirtualQuery)
-
 // ---- hooks (hooks.cpp) ----------------------------------------------------------------------------
 bool InstallHooks();      // MinHook init + all detours; needs ResolveTargets() first
 void RemoveHooks();
-bool BuilderToolOpen(uint64_t graceMs);   // road / track tool open: StreetBuilder::Step ran within graceMs
+bool BuilderToolOpen(uint64_t graceMs);   // road / track tool open: Step / UpdateRenderer ran within graceMs
 
 // ---- config (config.cpp) --------------------------------------------------------------------------
 std::wstring PluginDir();            // ...\tf3snap\ (ends with a backslash)
